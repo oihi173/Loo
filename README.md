@@ -1,122 +1,51 @@
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoidRoot = char:WaitForChild("HumanoidRootPart")
 
--- GUI Setup (Basic example)
-local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-ScreenGui.Name = "WildHorseIslandsScript"
+-- Criar GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "PainelCustom"
 
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 300, 0, 380)
-MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.new(0.16, 0.16, 0.16)
-MainFrame.BorderSizePixel = 0
+-- Botão Abrir (⚪)
+local abrirBtn = Instance.new("TextButton", gui)
+abrirBtn.Size = UDim2.new(0, 40, 0, 40)
+abrirBtn.Position = UDim2.new(0, 10, 0, 200)
+abrirBtn.Text = "O"
+abrirBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+abrirBtn.TextScaled = true
+abrirBtn.Visible = true
 
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Text = "Wild Horse Islands Script"
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.new(1,1,1)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextScaled = true
+-- Painel
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 300, 0, 250)
+frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Active = true
+frame.Draggable = true
+frame.Visible = false
 
--- Feature toggles
-local autoFarmEnabled = false
-local flyEnabled = false
+-- Botão Fechar (❌)
+local fecharBtn = Instance.new("TextButton", frame)
+fecharBtn.Size = UDim2.new(0, 30, 0, 30)
+fecharBtn.Position = UDim2.new(1, -35, 0, 5)
+fecharBtn.Text = "X"
+fecharBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+fecharBtn.TextScaled = true
 
--- Simple Button Creation Function
-local function createButton(text, posY, callback)
-    local btn = Instance.new("TextButton", MainFrame)
-    btn.Text = text
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
-    btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.BackgroundColor3 = Color3.new(0.25, 0.25, 0.35)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.SourceSans
-    btn.TextScaled = true
-    btn.MouseButton1Click:Connect(callback)
-    return btn
-end
+-- Botão Ativar/Desativar Auto-Rebater
+local autoBtn = Instance.new("TextButton", frame)
+autoBtn.Size = UDim2.new(0, 200, 0, 40)
+autoBtn.Position = UDim2.new(0, 50, 0, 50)
+autoBtn.Text = "Ativar Auto-Rebater"
+autoBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+autoBtn.TextScaled = true
 
--- Auto Farm Example (Collects nearby apples/flowers)
-local function autoFarmLoop()
-    while autoFarmEnabled do
-        for _, item in pairs(Workspace:GetChildren()) do
-            if item:IsA("Part") and (item.Name == "Apple" or item.Name == "Flower") then
-                if (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = item.CFrame + Vector3.new(0,2,0)
-                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, item, 0)
-                    wait(0.1)
-                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, item, 1)
-                end
-                wait(0.3)
-            end
-        end
-        wait(1)
-    end
-end
+-- Campo de força (lado)
+local forcaLabel = Instance.new("TextLabel", frame)
+forcaLabel.Size = UDim2.new(0, 200, 0, 25)
+forcaLabel.Position = UDim2.new(0, 50, 0, 100)
+forcaLabel.Text = "Força Lateral:"
+forcaLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+forcaLabel.BackgroundTransparency = 1
 
--- Fly Mode Example
-local flySpeed = 50
-local function flyLoop()
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-    local flying = true
-    local bodyVel = Instance.new("BodyVelocity", hrp)
-    bodyVel.MaxForce = Vector3.new(1e5,1e5,1e5)
-    bodyVel.Velocity = Vector3.new(0,0,0)
-    RunService.RenderStepped:Connect(function()
-        if flyEnabled then
-            bodyVel.Velocity = hrp.CFrame.lookVector * flySpeed
-        else
-            flying = false
-            bodyVel:Destroy()
-        end
-    end)
-end
-
--- Teleport Example
-local function teleportTo(locationCFrame)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = locationCFrame
-    end
-end
-
--- Buttons for features
-createButton("Toggle Auto Farm", 50, function()
-    autoFarmEnabled = not autoFarmEnabled
-    if autoFarmEnabled then
-        autoFarmLoop()
-    end
-end)
-
-createButton("Toggle Fly Mode", 100, function()
-    flyEnabled = not flyEnabled
-    if flyEnabled then
-        flyLoop()
-    end
-end)
-
-createButton("Teleport to Volcano Island", 150, function()
-    -- Example CFrame, replace with actual location
-    teleportTo(CFrame.new(500, 50, 1000))
-end)
-
-createButton("Teleport to Mainland", 200, function()
-    teleportTo(CFrame.new(0, 50, 0))
-end)
-
--- Info Button
-createButton("Credits & Info", 300, function()
-    Title.Text = "Wild Horse Islands Script\nUpdated for 2025!"
-end)
-
--- Pastebin Fetch Example (Requires executor with HTTP request support)
--- Example: loadstring(game:HttpGet("https://pastebin.com/raw/yourcode"))()
--- For security, always validate and use trusted sources.
-
--- End of Script
-print("Wild Horse Islands Script Loaded. Enjoy!")
+local forcaBox = Instance.new("TextBox
