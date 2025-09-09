@@ -1,14 +1,15 @@
--- Roblox Lua Script: Teleport GUI Lateral Atualizado
--- Painel arrastável + Auto Teleport com delay de 0.10s
+-- 😮‍💨boa noite cinderela
+-- Painel lateral de teleportes móvel, auto teleport, delay 0.10s, botão hambúrguer
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- GUI principal
 local gui = Instance.new("ScreenGui")
-gui.Name = "TeleportGUI"
+gui.Name = "BoaNoiteCinderelaGUI"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = playerGui
@@ -21,15 +22,32 @@ local teleports = {
     {name = "Local 4", pos = Vector3.new(3953.47, 21.00, -6689.76)}
 }
 
+-- Botão hambúrguer (mostrar/ocultar painel)
+local hamburger = Instance.new("TextButton")
+hamburger.Size = UDim2.new(0, 40, 0, 40)
+hamburger.Position = UDim2.new(0, 10, 0, 10)
+hamburger.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+hamburger.Text = "☰"
+hamburger.TextColor3 = Color3.fromRGB(255, 255, 255)
+hamburger.Font = Enum.Font.GothamBold
+hamburger.TextSize = 24
+hamburger.Parent = gui
+hamburger.ZIndex = 2
+
 -- Painel lateral
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 220, 0, 320)
-frame.Position = UDim2.new(0, 10, 0.3, 0) -- esquerda da tela
+frame.Position = UDim2.new(0, 60, 0.3, 0) -- começa à esquerda, mas pode ser movido
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.BackgroundTransparency = 0.05
 frame.BorderSizePixel = 0
 frame.Parent = gui
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0,10)
+
+-- Função: mostrar/ocultar painel
+hamburger.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
 
 -- Função para tornar frame arrastável
 local dragging, dragInput, dragStart, startPos
@@ -65,6 +83,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         update(input)
+        task.wait(0.10) -- delay de movimento
     end
 end)
 
